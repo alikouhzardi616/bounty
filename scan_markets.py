@@ -28,7 +28,7 @@ class Feed:
 
 
 # Public static JSON feed; it aggregates multiple sources and includes escrow
-# and competing-PR metadata. Unknown escrow is never treated as funded.
+# and competing-PR metadata. Only explicit locked-escrow evidence is accepted.
 FEEDS = (
     Feed(
         name="Bounty Radar (aggregated feed)",
@@ -129,19 +129,41 @@ def get_amount(record: dict) -> tuple[str, float] | None:
 
 
 def is_confirmed_funded(record: dict) -> bool:
-    state = get_state(record)
-    if state in {"funded", "escrowed", "payment_secured"}:
+    evidence = [
+        str(record.get(key) or "").strip().lower()
+        for key in (
+            "escrow",
+            "escrowStatus",
+            "escrow_status",
+            "fundingStatus",
+            "funding_status",
+        )
+    ]
+    negative_evidence = re.compile(
+        r"\b(?:unknown|unverified|pending|verify|unfunded|"
+        r"not\s+(?:yet\s+)?(?:escrowed|locked)|escrow\s+not\s+locked)\b"
+    )
+    locked_evidence = re.compile(
+        r"\b(?:escrowed|escrow[\s_-]+locked|"
+        r"locked[\s_-]+(?:in[\s_-]+)?escrow)\b"
+    )
+    if any(negative_evidence.search(value) for value in evidence):
+        return False
+    if any(
+        record.get(key) is True
+        for key in (
+            "escrowed",
+            "is_escrowed",
+            "escrow_locked",
+            "is_escrow_locked",
+            "escrowLocked",
+            "isEscrowLocked",
+        )
+    ):
         return True
-    for key in ("funded", "is_funded", "escrowed", "is_escrowed"):
-        if record.get(key) is True:
-            return True
-    escrow = str(record.get("escrow") or "").strip().lower()
-    if not escrow:
-        return False
-    unknown_markers = ("unknown", "verify", "unverified", "not funded", "pending")
-    if any(marker in escrow for marker in unknown_markers):
-        return False
-    return any(marker in escrow for marker in ("funded", "escrowed", "secured"))
+    if get_state(record) in {"escrowed", "escrow_locked", "locked_escrow"}:
+        return True
+    return any(locked_evidence.search(value) for value in evidence)
 
 
 def is_open(record: dict) -> bool:
@@ -151,7 +173,8 @@ def is_open(record: dict) -> bool:
     for key in ("closed", "completed", "claimed", "expired", "cancelled", "canceled"):
         if record.get(key) is True:
             return False
-    if "issue" in record:
+    issue_url = re.search(r"github\.com/[^/]+/[^/]+/issues/\d+", record_url(record))
+    if "issue" in record or issue_url:
         if "openCompetingPrs" not in record or record["openCompetingPrs"] is None:
             return False
         try:
@@ -307,14 +330,14 @@ def render_markdown(
             [
                 "## No verified opportunities",
                 "",
-                "No configured public platform feed returned a task with both an explicit positive reward and confirmed funded/open status.",
+                "No configured public feed returned a task with a positive reward, explicit locked-escrow evidence, and no known competing PRs.",
                 "",
             ]
         )
         if unverified_leads:
             lines.extend(
                 [
-                    "## Leads excluded: escrow not confirmed",
+                    "## Leads excluded: locked escrow not confirmed",
                     "",
                     "These are not actionable opportunities. Confirm funding and task availability directly before considering them.",
                     "",
@@ -333,7 +356,7 @@ def render_markdown(
 
     lines.extend(
         [
-            "## Funded and open tasks (ranked by likely completion speed)",
+            "## Verified locked-escrow and open tasks (ranked by likely completion speed)",
             "",
             "| Rank | Speed | Platform | Reward | Status | Task | Updated |",
             "|---:|---:|---|---:|---|---|---|",
@@ -374,8 +397,9 @@ def main(argv: list[str] | None = None) -> int:
             unverified_leads.extend(unverified_funding)
             successful_feeds += 1
             statuses.append(
-                f"{feed.name}: OK; {total} records, {len(found)} verified funded/open task(s), "
-                f"{len(unverified_funding)} positive-reward open lead(s) without confirmed escrow."
+                f"{feed.name}: OK; {total} records, {len(found)} verified positive-reward "
+                f"locked-escrow task(s) with no competing PRs, "
+                f"{len(unverified_funding)} positive-reward open lead(s) without confirmed locked escrow."
             )
         except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError, ValueError, json.JSONDecodeError) as exc:
             status = f"{feed.name}: unavailable ({exc})."

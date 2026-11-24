@@ -35,6 +35,36 @@ class MarketFeedTests(unittest.TestCase):
         self.assertIsNotNone(item)
         self.assertEqual(item["reward"], "100 USD")
 
+    def test_locked_escrow_phrase_is_eligible(self) -> None:
+        record = {
+            "title": "Small docs task",
+            "url": "https://github.com/acme/tool/issues/1",
+            "amountUsd": 100,
+            "escrow": "Funds locked in escrow",
+            "issue": 1,
+            "openCompetingPrs": 0,
+            "ageDays": 1,
+        }
+
+        self.assertIsNotNone(normalize_record("feed", record))
+
+    def test_funded_flag_without_locked_escrow_is_not_eligible(self) -> None:
+        record = {
+            "title": "Paid task",
+            "url": "https://github.com/acme/tool/issues/1",
+            "amountUsd": 100,
+            "funded": True,
+            "issue": 1,
+            "openCompetingPrs": 0,
+            "ageDays": 1,
+        }
+
+        self.assertFalse(is_confirmed_funded(record))
+        self.assertIsNone(normalize_record("feed", record))
+
+    def test_negated_escrow_claim_is_not_eligible(self) -> None:
+        self.assertFalse(is_confirmed_funded({"escrow": "not escrowed"}))
+
     def test_competing_pr_disqualifies_issue(self) -> None:
         self.assertFalse(
             is_open(
@@ -48,6 +78,11 @@ class MarketFeedTests(unittest.TestCase):
 
     def test_unknown_competing_pr_count_is_not_actionable(self) -> None:
         self.assertFalse(is_open({"state": "open", "issue": 1}))
+
+    def test_github_issue_without_competing_pr_metadata_is_not_open(self) -> None:
+        self.assertFalse(
+            is_open({"state": "open", "url": "https://github.com/acme/tool/issues/1"})
+        )
 
     def test_feed_generation_time_is_parsed(self) -> None:
         age = feed_age_hours({"generatedAt": "2026-11-24T16:34:56Z"})

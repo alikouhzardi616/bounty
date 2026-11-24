@@ -1,19 +1,19 @@
 # Crypto-Friendly Bounty Opportunities
 
-Scanned: 2026-11-24T19:49:54.929281+00:00
+Scanned: 2026-11-24T20:44:30.118989+00:00
 
 Data comes from a public third-party aggregator. Verify escrow and terms at the original platform before spending time.
 No accounts were accessed and no bounty was claimed or submitted.
 
 ## Feed status
 
-- Bounty Radar (aggregated feed): OK; 46 records, 0 verified funded/open task(s), 4 positive-reward open lead(s) without confirmed escrow.
+- Bounty Radar (aggregated feed): OK; 46 records, 0 verified positive-reward locked-escrow task(s) with no competing PRs, 4 positive-reward open lead(s) without confirmed locked escrow.
 
 ## No verified opportunities
 
-No configured public platform feed returned a task with both an explicit positive reward and confirmed funded/open status.
+No configured public feed returned a task with a positive reward, explicit locked-escrow evidence, and no known competing PRs.
 
-## Leads excluded: escrow not confirmed
+## Leads excluded: locked escrow not confirmed
 
 These are not actionable opportunities. Confirm funding and task availability directly before considering them.
 

@@ -21,11 +21,11 @@ The AI worker can build, test, package, and document paid-work deliverables insi
 - **C - Human handoff:** record exact account/login/submission steps in `HUMAN_NEEDED.md`
 - **No silent claiming:** the loop stops before account actions or irreversible submissions
 
-## Latest market scan — 2026-11-24
+## Latest market scan — 2026-11-25
 
-- Feed checked: public Bounty Radar aggregate, **46 records**
-- Explicitly verified funded/open tasks: **0**
-- Positive-reward leads excluded because escrow is unverified: **4**
+- Latest scan: 2026-11-24 20:44 UTC; public Bounty Radar feed reported generation at 2026-11-24 16:34 UTC; **46 records**
+- Verified positive-reward tasks with explicit locked escrow and no competing PRs: **0**
+- Positive-reward leads excluded because locked escrow is unverified: **4**
 - Scanner command: `python scan_markets.py --output OPPORTUNITIES.md`
 - No credentials, account access, wallet signing, or claims were used.
 

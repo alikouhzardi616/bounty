@@ -114,3 +114,9 @@ Structured using `DELIVERABLES.md`; this is a proposed scope, not an implementat
 Added `separate_jsonl()` to share the validator's parsing behavior while streaming accepted lines unchanged and rejected lines as diagnostic JSONL objects (`line`, `column`, `reason`, and `raw`). Added paired `--valid-out` / `--invalid-out` options, limited to JSONL and protected against output path collisions; default CLI behavior is unchanged.
 
 Verification: `python -m unittest discover -s tests -v` passed **29 tests** (the prior 24 plus 5 focused partition/CLI tests).
+
+### Fresh strict bounty scan — 2026-11-25
+
+Ran `python scan_markets.py --output OPPORTUNITIES.md` against the public Bounty Radar aggregate (latest report scan: `2026-11-24T20:44:30Z`; feed `generatedAt` observed: `2026-11-24T16:34:56Z`). It returned 46 records, 0 actionable tasks, and 4 positive-reward leads with unverified escrow. No accounts were accessed and no bounty was claimed or submitted.
+
+Tightened market filtering so a positive reward and a generic `funded` flag are not enough: only explicit escrowed/locked evidence qualifies, negative or unknown escrow claims are rejected, and GitHub issue records require a known zero competing-PR count. Added tests for those boundaries. After this change, the full test suite passed **33 tests**. The four leads remain unverified and must not be started without checking escrow and availability at the source.

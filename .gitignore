@@ -1,0 +1,49 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.tox/
+
+# Test, coverage, and temporary outputs
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+test-results/
+test-output/
+*.tmp
+*.temp
+*.log
+*.swp
+
+# Local environment files and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+*.token
+*.tokens
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+credentials.*.json
+secrets/
+
+# These are standalone repositories; manage their history separately.
+/candidates/agent-conformance-quarantine/
+/candidates/MergeEarn/
